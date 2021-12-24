@@ -140,13 +140,6 @@ func findOxygenGeneratorRating(numbers []string, position int) (string, error) {
 		}
 	}
 
-	// fmt.Println("Numbers with 0")
-	// fmt.Println(countZero)
-	// fmt.Println(numbersWithZero)
-	// fmt.Println("Numbers with 1")
-	// fmt.Println(countOne)
-	// fmt.Println(numbersWithOne)
-
 	if countOne >= countZero {
 		return findOxygenGeneratorRating(numbersWithOne, position+1)
 	} else {
@@ -179,13 +172,6 @@ func findCO2ScrubberRating(numbers []string, position int) (string, error) {
 			numbersWithOne = append(numbersWithOne, numbers[i])
 		}
 	}
-
-	// fmt.Println("Numbers with 0")
-	// fmt.Println(countZero)
-	// fmt.Println(numbersWithZero)
-	// fmt.Println("Numbers with 1")
-	// fmt.Println(countOne)
-	// fmt.Println(numbersWithOne)
 
 	if countZero <= countOne {
 		return findCO2ScrubberRating(numbersWithZero, position+1)
