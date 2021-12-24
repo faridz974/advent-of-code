@@ -11,6 +11,7 @@ import (
 type Board struct {
 	puzzle [][]int
 	Sum    int
+	Id int
 }
 
 func (b *Board) Mark(n int) {
@@ -70,7 +71,7 @@ func removeEmptyString(array []string) []string {
 	return newArray
 }
 
-func createBoard(array []string) Board {
+func createBoard(array []string, id int) Board {
 	var puzzle [][]int
 
 	for i := 0; i < 5; i++ {
@@ -83,7 +84,7 @@ func createBoard(array []string) Board {
 		puzzle = append(puzzle, lineArray)
 	}
 
-	return Board{puzzle,0}
+	return Board{puzzle,0,id}
 }
 
 func createBoards(boardsLines []string) []Board {
@@ -92,7 +93,7 @@ func createBoards(boardsLines []string) []Board {
 	line := 0
 	for line < len(boardsLines) {
 		boardLines := boardsLines[line : line+5]
-		boards = append(boards, createBoard(boardLines))
+		boards = append(boards, createBoard(boardLines,line))
 		line = line + 5
 	}
 
@@ -124,10 +125,36 @@ func Solve() {
 			break
 		}
 	}
-
-	fmt.Println(boards)
 }
 
 func Solve2() {
+	content, err := ioutil.ReadFile("./day04/input.txt")
+	if err != nil {
+		log.Fatalf("unable to read file: %v", err)
+	}
 
+	lines := removeEmptyString(strings.Split(string(content), "\n"))
+	numbers := strings.Split(lines[0], ",")
+	boards := createBoards(lines[1:])
+
+	m := make(map[int]Board)
+	for _, n := range numbers {
+		number, _ := strconv.Atoi(n)
+		for _, board := range boards {
+			if _ , ok := m[board.Id]; !ok {
+				board.Mark(number)
+				if board.CheckWin() {
+					m[board.Id] = board
+					if(len(m) == len(boards)){
+						fmt.Println(board.Sum * number)
+						break
+					}
+				}
+
+			}
+		}
+		if len(m) == len(boards) {
+			break
+		}
+	}
 }
