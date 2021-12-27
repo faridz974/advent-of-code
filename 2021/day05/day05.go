@@ -3,6 +3,7 @@ package day05
 import (
 	"advent-of-code/2021/util"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 )
@@ -29,7 +30,23 @@ func Solve() {
 		entries[i] = parseLine(lines[i])
 	}
 
-	points := buildAllPoints(entries)
+	points := buildHorizontalVerticalPoints(entries)
+	fmt.Println(getOverlap(points))
+}
+
+func Solve2() {
+	lines, err := util.ReadLines("./day05/input.txt")
+	if err != nil {
+		panic(err)
+	}
+
+	entries := make([]Entry, len(lines))
+
+	for i := 0; i < len(lines); i++ {
+		entries[i] = parseLine(lines[i])
+	}
+
+	points := buildHorizontalVerticalDiagonalPoints(entries)
 	fmt.Println(getOverlap(points))
 }
 
@@ -48,7 +65,42 @@ func parseLine(line string) Entry {
 	}
 }
 
-func buildAllPoints(entries []Entry) []Line {
+func buildHorizontalVerticalPoints(entries []Entry) []Line {
+	lines := make([]Line, 0)
+
+	for _, entry := range entries {
+		if entry.from.X == entry.to.X || entry.from.Y == entry.to.Y {
+			if entry.from.X > entry.to.X && entry.from.Y == entry.to.Y {
+				newLines := make([]Line, 0)
+				for i := entry.from.X; i >= entry.to.X; i-- {
+					newLine := Line{i, entry.from.Y}
+					newLines = append(newLines, newLine)
+				}
+				lines = append(lines, newLines...)
+			} else if entry.from.X < entry.to.X && entry.from.Y == entry.to.Y {
+				newLines := make([]Line, 0)
+				for i := entry.from.X; i <= entry.to.X; i++ {
+					newLine := Line{i, entry.from.Y}
+					newLines = append(newLines, newLine)
+				}
+				lines = append(lines, newLines...)
+			} else if entry.from.Y > entry.to.Y && entry.from.X == entry.to.X {
+				newLines := make([]Line, 0)
+				for i := entry.from.Y; i >= entry.to.Y; i-- {
+					newLine := Line{entry.from.X, i}
+					newLines = append(newLines, newLine)
+				}
+				lines = append(lines, newLines...)
+			} else {
+				fmt.Println("Entry invalid")
+			}
+		}
+	}
+
+	return lines
+}
+
+func buildHorizontalVerticalDiagonalPoints(entries []Entry) []Line {
 	lines := make([]Line, 0)
 
 	for _, entry := range entries {
@@ -84,6 +136,37 @@ func buildAllPoints(entries []Entry) []Line {
 			} else {
 				fmt.Println("Entry invalid")
 			}
+		} else if math.Abs(float64(entry.from.X-entry.to.X)) == math.Abs(float64(entry.from.Y-entry.to.Y)) {
+			newLines := make([]Line, 0)
+			if entry.from.X >= entry.to.X {
+				i := entry.from.X
+				j := entry.from.Y
+				for i >= entry.to.X {
+					newLine := Line{i, j}
+					newLines = append(newLines, newLine)
+					i--
+					if entry.from.Y <= entry.to.Y {
+						j++
+					} else {
+						j--
+					}
+				}
+			} else {
+				i := entry.from.X
+				j := entry.from.Y
+				for i <= entry.to.X {
+					newLine := Line{i, j}
+					newLines = append(newLines, newLine)
+					i++
+					if entry.from.Y <= entry.to.Y {
+						j++
+					} else {
+						j--
+					}
+				}
+
+			}
+			lines = append(lines, newLines...)
 		}
 	}
 

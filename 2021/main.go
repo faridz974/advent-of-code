@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	day05.Solve()
+	day05.Solve2()
 }
