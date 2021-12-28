@@ -3,6 +3,7 @@ package util
 import (
 	"bufio"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -66,4 +67,39 @@ func MinMaxMap(m map[int]int) (int, int) {
 		}
 	}
 	return min, max
+}
+
+func Sum(array []int) int {
+	var sum int = 0
+	for _, value := range array {
+		sum += value
+	}
+	return sum
+}
+
+type RuneSlice []rune
+
+func (p RuneSlice) Len() int           { return len(p) }
+func (p RuneSlice) Less(i, j int) bool { return p[i] < p[j] }
+func (p RuneSlice) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
+
+func Sort(s string) string {
+	runes := []rune(s)
+	sort.Sort(RuneSlice(runes))
+	return string(runes)
+}
+
+func Intersect(s1 string, s2 string) []rune {
+	m := make(map[rune]bool)
+	result := make([]rune, 0)
+	for _, s := range s1 {
+		m[s] = true
+	}
+
+	for _, s := range s2 {
+		if _, ok := m[s]; ok {
+			result = append(result, s)
+		}
+	}
+	return result
 }
