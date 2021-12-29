@@ -103,3 +103,12 @@ func Intersect(s1 string, s2 string) []rune {
 	}
 	return result
 }
+
+func ConvertToIntArray(s string) []int {
+	result := make([]int, 0)
+	for _, r := range s {
+		number, _ := strconv.Atoi(string(r))
+		result = append(result, number)
+	}
+	return result
+}
