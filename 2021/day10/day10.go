@@ -3,31 +3,15 @@ package day10
 import (
 	"advent-of-code/2021/util"
 	"fmt"
+	"sort"
 	"strings"
-)
-
-type TokenType string
-
-type Token struct {
-	Type    TokenType
-	Literal string
-}
-
-const (
-	LPAREN  = "("
-	RPAREN  = ")"
-	LBRACE  = "{"
-	RBRACE  = "}"
-	LBRACK  = "["
-	RBRACK  = "]"
-	LESS    = "<"
-	GREATER = ">"
 )
 
 type ParsedLine struct {
 	isError      bool
 	isIncomplete bool
 	score        int
+	remaining    string
 }
 
 func Solve() {
@@ -38,7 +22,6 @@ func Solve() {
 
 	score := make([]int, len(lines))
 	for idx, line := range lines {
-		fmt.Println(line)
 		parsedLine := parse(line)
 		score[idx] = parsedLine.score
 	}
@@ -46,20 +29,24 @@ func Solve() {
 }
 
 func Solve2() {
-	lines, error := util.ReadLines("./day10/sample.txt")
+	lines, error := util.ReadLines("./day10/input.txt")
 	if error != nil {
 		panic(error)
 	}
 
-	score := make([]int, len(lines))
-	parsedLines := make([]ParsedLine, len(lines))
-	for idx, line := range lines {
-		fmt.Println(line)
+	score := make([]int, 0)
+	for _, line := range lines {
 		parsedLine := parse(line)
-		parsedLines[idx] = parsedLine
-		score[idx] = parsedLines[idx].score
-		fmt.Println(util.Sum(score))
+		if parsedLine.isIncomplete {
+			missingPart := autcomplete(parsedLine)
+			lineScore := calculateAutocompleteScore(missingPart)
+			score = append(score, lineScore)
+		}
 	}
+
+	sort.Ints(score)
+	middleScore := score[len(score)/2]
+	fmt.Println(middleScore)
 }
 
 func parse(line string) ParsedLine {
@@ -73,16 +60,15 @@ func parse(line string) ParsedLine {
 			break
 		}
 	}
-	fmt.Println(line)
 	if isIncomplete(line) {
-		return ParsedLine{isError: false, isIncomplete: true, score: 0}
+		return ParsedLine{isError: false, isIncomplete: true, remaining: line, score: 0}
 	}
 
 	return findIllegalChar(line)
 }
 
 func isIncomplete(line string) bool {
-	return !strings.Contains(line, RBRACE) && !strings.Contains(line, RBRACK) && !strings.Contains(line, RPAREN) && !strings.Contains(line, GREATER)
+	return !strings.Contains(line, "}") && !strings.Contains(line, "]") && !strings.Contains(line, ")") && !strings.Contains(line, ">")
 }
 
 func findIllegalChar(line string) ParsedLine {
@@ -109,24 +95,56 @@ func findIllegalChar(line string) ParsedLine {
 	}
 
 	min, _ := util.MinMax(allIndexes)
-
-	fmt.Println(min)
-
 	errorChar := string(line[min])
-	fmt.Println(errorChar)
 
-	if errorChar == ")" {
-		return ParsedLine{isError: true, isIncomplete: false, score: 3}
-	}
-	if errorChar == "]" {
-		return ParsedLine{isError: true, isIncomplete: false, score: 57}
-	}
-	if errorChar == "}" {
-		return ParsedLine{isError: true, isIncomplete: false, score: 1197}
-	}
-	if errorChar == ">" {
-		return ParsedLine{isError: true, isIncomplete: false, score: 25137}
+	switch errorChar {
+	case ")":
+		return ParsedLine{isError: true, isIncomplete: false, remaining: line, score: 3}
+	case "]":
+		return ParsedLine{isError: true, isIncomplete: false, remaining: line, score: 57}
+	case "}":
+		return ParsedLine{isError: true, isIncomplete: false, remaining: line, score: 1197}
+	case ">":
+		return ParsedLine{isError: true, isIncomplete: false, remaining: line, score: 25137}
 	}
 
-	return ParsedLine{isError: false, isIncomplete: false, score: 0}
+	return ParsedLine{isError: false, isIncomplete: false, remaining: line, score: 0}
+}
+
+func autcomplete(parsedLine ParsedLine) []rune {
+	missing := make([]rune, 0)
+	for i := len(parsedLine.remaining) - 1; i >= 0; i-- {
+		currentChar := rune(parsedLine.remaining[i])
+		switch currentChar {
+		case '(':
+			missing = append(missing, ')')
+		case '[':
+			missing = append(missing, ']')
+		case '{':
+			missing = append(missing, '}')
+		case '<':
+			missing = append(missing, '>')
+		}
+	}
+
+	return missing
+}
+
+func calculateAutocompleteScore(str []rune) int {
+	total := 0
+
+	for _, char := range str {
+		switch char {
+		case ')':
+			total = total*5 + 1
+		case ']':
+			total = total*5 + 2
+		case '}':
+			total = total*5 + 3
+		case '>':
+			total = total*5 + 4
+		}
+	}
+
+	return total
 }
